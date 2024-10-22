@@ -1,0 +1,23 @@
+{
+	"type": "module",
+	"scripts": {
+		"build-web-dev": "esbuild web-js/client.js --bundle --sourcemap --outfile=public/app-bundle.js",
+		"build": "esbuild web-js/client.js --bundle --minify --outfile=public/app-bundle.js && tsc",
+		"start": "node dist/client.js",
+		"dev": "esbuild web-js/client.js --bundle --sourcemap --outfile=public/app-bundle.js  && tsx watch src/client.ts"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.0",
+		"@types/selenium-webdriver": "^4.1.26",
+		"esbuild": "0.24.0",
+		"tsx": "^4.19.1",
+		"typescript": "^5.6.3"
+	},
+	"packageManager": "pnpm@9.12.2+sha512.22721b3a11f81661ae1ec68ce1a7b879425a1ca5b991c975b074ac220b187ce56c708fe5db69f4c962c989452eee76c82877f4ee80f474cebd61ee13461b6228",
+	"dependencies": {
+		"express": "^4.21.1",
+		"mediasoup-client": "^3.7.17",
+		"selenium-webdriver": "^4.25.0",
+		"socket.io-client": "^4.8.0"
+	}
+}
