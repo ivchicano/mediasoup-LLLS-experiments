@@ -131,5 +131,7 @@ dist
 
 .vagrant
 client/media/*
-app-bundle.js
-app-bundle.js.map
+client/public/app-bundle.js
+client/public/app-bundle.js.map
+client/stats/*
+client/recordings/*

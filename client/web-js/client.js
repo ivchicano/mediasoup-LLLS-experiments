@@ -2,6 +2,9 @@ import * as mediasoup from 'mediasoup-client';
 import socketClient from 'socket.io-client';
 import { promise as socketPromise } from './lib/socket.io-promise.js';
 
+const STATS_INTERVAL = 5000;
+const BLOB_INTERVAL = 5000;
+
 let device;
 let socket;
 let videoProducer;
@@ -10,6 +13,8 @@ let videoConsumer;
 let audioConsumer;
 let producerStream;
 let subscriberStream;
+let producerRecorder;
+let consumerRecorder;
 
 const $ = document.querySelector.bind(document);
 const $fsPublish = $('#fs_publish');
@@ -141,7 +146,26 @@ function createSendTransport(data, kind) {
         }
     });
 
+    setStatsInterval(transport);
     return transport;
+}
+
+function setStatsInterval(statsHolder) {
+    setInterval(async () => {
+        let stats = await statsHolder.getStats();
+        let statsObject = [];
+        stats.forEach((value, key) => {
+            statsObject.push(value);
+        });
+        fetch('http://localhost:4000/stats', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(statsObject)
+        })
+        .catch(error => console.error('Error sending stats:', error));
+    }, STATS_INTERVAL);
 }
 
 async function publish(e) {
@@ -176,7 +200,7 @@ async function publish(e) {
         if ($chkSimulcast.checked) {
             videoParams.encodings = [
                 { maxBitrate: 100000 },
-                { maxBitrate: 300000 },
+                { maxBitrate: 400000 },
                 { maxBitrate: 900000 },
             ];
             videoParams.codecOptions = {
@@ -249,6 +273,12 @@ function createRecvTransport(data, kind) {
                         socket.request('resume', { kind: 'video' }),
                         socket.request('resume', { kind: 'audio' })
                     ]);
+                    consumerRecorder = setupRecorder(subscriberStream, "subscriber");
+                    if (producerStream) {
+                        producerRecorder = setupRecorder(producerStream, "publisher");
+                        producerRecorder.start(BLOB_INTERVAL);
+                    }
+                    consumerRecorder.start(BLOB_INTERVAL);
                 }
                 break;
 
@@ -327,4 +357,41 @@ async function consumeKind(data, transport) {
         codecOptions,
     });
     return consumer;
+}
+
+function setupRecorder(stream, type) {
+    let recorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm'
+    });
+    recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+            sendBlob(e.data, type).catch((error) => {
+                console.error(error);
+            });
+        }
+    };
+    recorder.onstart = () => {
+        console.log("Recording started");
+    };
+
+    recorder.onerror = (error) => {
+        console.error("Error in recording");
+        console.error(error);
+    };
+    return recorder;
+}
+
+async function sendBlob(blob, type) {
+    const formData = new FormData();
+    formData.append('file', blob, type + ".webm");
+    return fetch('http://localhost:4000/videos', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            console.log("Chunk sent");
+        } else {
+            console.error("Error sending chunk");
+        }
+    }).catch(error => console.error(error));
 }

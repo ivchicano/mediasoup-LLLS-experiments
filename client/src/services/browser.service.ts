@@ -83,12 +83,12 @@ export class RealBrowserService {
         const subscribeButton = await driver.findElement(By.id('btn_subscribe'));
         await subscribeButton.click();
         await Promise.all([
-            driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_video')), 'subscribed video'), this.BROWSER_WAIT_TIMEOUT_MS),
-            driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_audio')), 'subscribed audio'), this.BROWSER_WAIT_TIMEOUT_MS)
+            driver.wait(until.elementLocated(By.id('sub_status_video')), this.BROWSER_WAIT_TIMEOUT_MS),
+            driver.wait(until.elementLocated(By.id('sub_status_audio')), this.BROWSER_WAIT_TIMEOUT_MS)
         ]);
         await Promise.all([
-            await driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_video')), 'subscribed video'), this.BROWSER_WAIT_TIMEOUT_MS),
-            await driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_audio')), 'subscribed audio'), this.BROWSER_WAIT_TIMEOUT_MS)
+            await driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_video')), 'subscribed to video'), this.BROWSER_WAIT_TIMEOUT_MS),
+            await driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_audio')), 'subscribed to audio'), this.BROWSER_WAIT_TIMEOUT_MS)
         ]);
     }
 }
