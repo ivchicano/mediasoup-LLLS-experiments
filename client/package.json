@@ -2,8 +2,7 @@
 	"type": "module",
 	"scripts": {
 		"build-web-dev": "esbuild web-js/client.js --bundle --sourcemap --outfile=public/app-bundle.js",
-		"build": "esbuild web-js/client.js --bundle --minify --outfile=public/app-bundle.js && tsc",
-		"start": "node dist/client.js",
+		"start": "esbuild web-js/client.js --bundle --minify --outfile=public/app-bundle.js && tsx src/client.ts",
 		"dev": "concurrently \"esbuild web-js/client.js --bundle --sourcemap --watch --outfile=public/app-bundle.js\" \"tsx watch src/client.ts\""
 	},
 	"devDependencies": {

@@ -1,8 +1,7 @@
 {
 	"type": "module",
 	"scripts": {
-		"build": "tsc",
-		"start": "node dist/server.js",
+		"start": "tsx src/server.ts",
 		"dev": "tsx watch src/server.ts"
 	},
 	"devDependencies": {
