@@ -4,17 +4,25 @@ import { SeleniumService } from './selenium.service.js';
 import path from 'path';
 import { __dirname } from '../dirname.js';
 import config from '../config.js';
+import fs from 'fs';
 
 export class RealBrowserService {
     private readonly BROWSER_WAIT_TIMEOUT_MS = 30000;
 	private chromeOptions = new chrome.Options();
 	private chromeCapabilities = Capabilities.chrome();
     private readonly VIDEO_FILE_LOCATION = path.join(__dirname, '..', 'media', 'fakevideo.y4m');
-	private readonly AUDIO_FILE_LOCATION = path.join(__dirname, '..', 'media', 'fakekaudio.wav');
+	private readonly AUDIO_FILE_LOCATION = path.join(__dirname, '..', 'media', 'fakeaudio.wav');
     private seleniumService: SeleniumService | undefined;
     private seleniumLogger: logging.Logger;
 
     constructor() {
+        if (!fs.existsSync(this.VIDEO_FILE_LOCATION)) {
+            throw new Error(`Video file not found at ${this.VIDEO_FILE_LOCATION}`);
+        }
+
+        if (!fs.existsSync(this.AUDIO_FILE_LOCATION)) {
+            throw new Error(`Audio file not found at ${this.AUDIO_FILE_LOCATION}`);
+        }
 		const prefs = new logging.Preferences();
 		this.seleniumLogger = logging.getLogger('webdriver');
 		prefs.setLevel(logging.Type.BROWSER, logging.Level.INFO);
