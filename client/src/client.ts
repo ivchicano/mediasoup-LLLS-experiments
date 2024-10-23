@@ -1,4 +1,4 @@
-import express from 'express';
+import express from 'express'
 import type { Request, Response } from 'express';
 import path from 'path';
 import { __dirname } from './dirname.js';
@@ -6,8 +6,10 @@ import { RealBrowserService } from './services/browser.service.js';
 import { createFile, saveStatsToFile } from './utils/stats-files.js';
 import fs from 'fs';
 import multer from 'multer';
+import logger from './logger.js';
 
 const RECORDINGS_PATH = path.join(__dirname, '..', 'recordings');
+const log = logger('Client');
 
 if (!fs.existsSync(RECORDINGS_PATH)) {
     fs.mkdirSync(RECORDINGS_PATH, { recursive: true });
@@ -19,7 +21,7 @@ const upload = multer({ storage });
 async function setupExpress(): Promise<express.Express> {
     const app = express();
     app.use(express.static(path.resolve(__dirname, '..', 'public')));
-    console.log('Express setup complete');
+    log.info('Express setup complete');
     return app;
 }
 
@@ -29,6 +31,7 @@ await createFile();
 app.post('/stats', express.json(), async (req: Request, res: Response) => {
     const jsonArray = req.body;
     await saveStatsToFile(jsonArray);
+    res.status(200).send();
 });
 
 app.post('/videos', upload.single("file"), (req: Request, res: Response): void => {
@@ -49,9 +52,14 @@ app.post('/videos', upload.single("file"), (req: Request, res: Response): void =
 });
 
 app.listen(4000, async () => {
-    console.log('Server is running on port 4000');
+    log.info('Server is running on port 4000');
     const browserService = new RealBrowserService();
     await browserService.startBrowser();
-    console.log('Test finished');
-    //process.exit(0);
+    const test_duration_s = 10;
+    setTimeout(async () => {
+        log.info(`Exiting process after ${test_duration_s} seconds`);
+        await browserService.stopBrowser();
+        log.info('Test finished');
+        process.exit(0);
+    }, test_duration_s * 1000);
 });

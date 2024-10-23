@@ -1,8 +1,10 @@
+import logger from "../logger.js";
 import { runScript } from "./run-script.js";
 import fs from "fs";
 const fsPromises = fs.promises;
 
 let started = false;
+const log = logger("FakeMediaDevices");
 
 export async function startFakeMediaDevices(videoPath: string, audioPath: string) {
     if (!started) {
@@ -33,7 +35,7 @@ export async function startFakeMediaDevices(videoPath: string, audioPath: string
                     console.error("Can't start V4L2 device");
                     process.exit();
                 }
-                console.log("Waiting for V4L2 device to be ready...");
+                log.info("Waiting for V4L2 device to be ready...");
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 attempts++;
             }
@@ -42,8 +44,8 @@ export async function startFakeMediaDevices(videoPath: string, audioPath: string
         await runScript(`${process.cwd()}/recording_scripts/start-fake-media.sh ${videoPath} ${audioPath}`, {
             detached: true
         });
-        console.log("Fake webcam started.");
-        console.log("Fake microphone started.");
+        log.info("Fake webcam started.");
+        log.info("Fake microphone started.");
     }
 }
 

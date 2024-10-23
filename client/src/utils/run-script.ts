@@ -1,7 +1,9 @@
 import { ChildProcess, spawn, exec } from 'child_process';
 import fs from 'fs';
+import logger from '../logger.js';
 
 const detachedPids: number[] = [];
+const log = logger("RunScript");
 
 export async function runScript(script: string, options?: {
     detached?: boolean,
@@ -9,7 +11,7 @@ export async function runScript(script: string, options?: {
     redirectStdoutToFile?: string,
     stdoutCallback?: ((chunk: any) => void)
 }): Promise<string | ChildProcess> {
-    console.log(script);
+    log.info(script);
     const promise: Promise<string | ChildProcess> = new Promise((resolve, reject) => {
         const execProcess = spawn(script, [], {
             cwd: `${process.cwd()}`,
@@ -31,13 +33,13 @@ export async function runScript(script: string, options?: {
                     execProcess.stdout.on('data', options.stdoutCallback);
                 } else {
                     execProcess.stdout.on('data', (data) => {
-                        console.log(data.toString());
+                        log.info(data.toString());
                     });
                 }
             }
             if (execProcess.stderr !== null) {
                 execProcess.stderr.on('data', (data) => {
-                    console.log(data.toString());
+                    log.info(data.toString());
                 });
             }
             execProcess.on('exit', (code) => {
@@ -57,11 +59,11 @@ export async function runScript(script: string, options?: {
 
 export function stopDetached(pid: number) {
     try {
-        console.log("Stopping " + pid);
+        log.info("Stopping " + pid);
         process.kill(-pid, "SIGINT");
     } catch (err) {
         try {
-            console.log("Retrying stopping " + pid);
+            log.info("Retrying stopping " + pid);
             process.kill(pid, "SIGINT");
         } catch (err2) {
             console.error(err);
@@ -71,14 +73,14 @@ export function stopDetached(pid: number) {
 }
 
 export function killAllDetached() {
-    console.log("PIDs to kill: " + detachedPids);
+    log.info("PIDs to kill: " + detachedPids);
     detachedPids.forEach(pid => {
         try {
-            console.log("Killing " + pid);
+            log.info("Killing " + pid);
             process.kill(-pid);
         } catch (err) {
             try {
-                console.log("Retrying killing " + pid);
+                log.info("Retrying killing " + pid);
                 process.kill(pid);
             } catch (err2) {
                 console.error(err);

@@ -378,6 +378,13 @@ function setupRecorder(stream, type) {
         console.error("Error in recording");
         console.error(error);
     };
+
+    recorder.onstop = () => {
+        const div = document.createElement('div');
+        div.id = 'producerRecordingStopped';
+        div.innerHTML = 'Producer recording stopped';
+        document.body.appendChild(div);
+    };
     return recorder;
 }
 

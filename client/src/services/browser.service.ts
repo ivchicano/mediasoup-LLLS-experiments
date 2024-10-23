@@ -7,6 +7,7 @@ import config from '../config.js';
 import fs from 'fs';
 
 export class RealBrowserService {
+    private driver: WebDriver | undefined;
     private readonly BROWSER_WAIT_TIMEOUT_MS = 30000;
 	private chromeOptions = new chrome.Options();
 	private chromeCapabilities = Capabilities.chrome();
@@ -55,6 +56,7 @@ export class RealBrowserService {
             this.seleniumService = await this.startSelenium();
         }
         const driver = await this.seleniumService.getChromeDriver(this.chromeCapabilities, this.chromeOptions);
+        this.driver = driver;
         await driver.manage().window().maximize();
         await driver.manage().setTimeouts({ implicit: this.BROWSER_WAIT_TIMEOUT_MS });
         await driver.get('http://localhost:4000');
@@ -98,5 +100,11 @@ export class RealBrowserService {
             await driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_video')), 'subscribed to video'), this.BROWSER_WAIT_TIMEOUT_MS),
             await driver.wait(until.elementTextIs(driver.findElement(By.id('sub_status_audio')), 'subscribed to audio'), this.BROWSER_WAIT_TIMEOUT_MS)
         ]);
+    }
+
+    public async stopBrowser() {
+        if (this.driver) {
+            await this.driver.quit();
+        }
     }
 }

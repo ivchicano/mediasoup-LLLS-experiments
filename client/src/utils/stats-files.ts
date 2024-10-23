@@ -2,9 +2,11 @@ import * as fs from 'fs';
 import * as fsp from 'fs/promises';
 import * as path from 'path';
 import { __dirname } from '../dirname.js';
+import logger from '../logger.js';
 
 export const STATS_DIR = path.resolve(__dirname, '..', 'stats');
 export const STATS_FILE = `stats.json`;
+const log = logger("StatFiles");
 
 if (!fs.existsSync(STATS_DIR)) {
 	fs.mkdirSync(STATS_DIR, { recursive: true });
@@ -12,12 +14,12 @@ if (!fs.existsSync(STATS_DIR)) {
 
 export async function createFile() {
   const filePath = `${STATS_DIR}/${STATS_FILE}`;
-  console.log("Creating file: " + filePath);
+  log.info("Creating file: " + filePath);
   try {
     await fsp.writeFile(filePath, "[]", { flag: "wx" });
   } catch (error: any) {
     if (error.code === 'EEXIST') {
-      console.log("File already exists: " + filePath);
+      log.info("File already exists: " + filePath);
     } else {
       throw error;
     }
