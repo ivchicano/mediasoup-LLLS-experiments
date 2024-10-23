@@ -19,23 +19,25 @@ export class SeleniumService {
             }
             // Start X server for browsers, assumes Xvfb installed and DISPLAY :10 free
             // TODO: choose display number in config
-            process.env.DISPLAY=":10"
-            if (!await isRunning("Xvfb :10")) {
-                await runScript(`Xvfb ${process.env.DISPLAY} -screen 0 1920x1080x24 -ac`, {
-                    detached: true,
-                    ignoreLogs: true
-                });
-            }
-            if (!await isRunning("x11vnc -display :10")) {
-                await runScript(`x11vnc -display :10 -nopw -forever -bg -shared`, {
-                    ignoreLogs: true
-                });
-            }
-            if (!await isRunning("fvwm")) {
-                await runScript(`fvwm`, {
-                    detached: true,
-                    ignoreLogs: true
-                });
+            if (process.platform === "linux") {
+                process.env.DISPLAY = ":10";
+                if (!await isRunning("Xvfb :10")) {
+                    await runScript(`Xvfb ${process.env.DISPLAY} -screen 0 1920x1080x24 -ac`, {
+                        detached: true,
+                        ignoreLogs: true
+                    });
+                }
+                if (!await isRunning("x11vnc -display :10")) {
+                    await runScript(`x11vnc -display :10 -nopw -forever -bg -shared`, {
+                        ignoreLogs: true
+                    });
+                }
+                if (!await isRunning("fvwm")) {
+                    await runScript(`fvwm`, {
+                        detached: true,
+                        ignoreLogs: true
+                    });
+                }
             }
             // Start fake webcam for media capture
             // await startFakeMediaDevices(videoPath, audioPath);
