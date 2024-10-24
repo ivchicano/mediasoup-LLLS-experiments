@@ -135,3 +135,5 @@ client/public/app-bundle.js
 client/public/app-bundle.js.map
 client/stats/*
 client/recordings/*
+
+__pycache__/
